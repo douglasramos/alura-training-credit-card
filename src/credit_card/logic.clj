@@ -1,25 +1,45 @@
 (ns credit-card.logic
-  (:require [credit-card.db :as db]))
+  (:import [java.time LocalDateTime]))
 
-(def random-transaction {:date "20210121"
-                         :value 24.5
-                         :establishment "Burguer king"
-                         :category "Food"})
+(defn total-amount-spent [transactions]
+  (->> transactions
+       (map :value)
+       (reduce +)))
+
+(defn available-limit [transactions limit]
+  (- limit (total-amount-spent transactions)))
+
+(defn string->datetime [date-string]
+  (LocalDateTime/parse date-string))
+
+(defn month-transactions [month all-transactions]
+  (filter
+    #(= month (.getMonth (:date %)))
+    all-transactions))
+
+(defn transactions-by-category [transactions]
+  (group-by :category transactions))
+
+(defn category-bill [transactions]
+  (reduce
+    (fn [new-map [key value]]
+      (assoc
+        new-map
+        key
+        (->> value
+             (map :value)
+             (reduce +))))
+    {}
+    (transactions-by-category transactions)))
+
+(defn bill [transactions]
+  (assoc (category-bill transactions) :total (reduce + (map :value transactions))))
 
 
-(def random-costumer {:name "Douglas Ramos"
-                     :cpf "051.342.3452-44"
-                     :email "douglas.ramos@nubank.com.br"})
 
-(defn transact! [transaction]
-  (db/insert-transaction! transaction))
 
-(defn create-costumer! [costumer]
-  (db/insert-costumer! costumer))
 
-;; manual tests
-(create-costumer! random-costumer)
 
-(transact! random-transaction)
 
-(println db/db)
+
+

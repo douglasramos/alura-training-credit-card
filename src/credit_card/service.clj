@@ -1,5 +1,5 @@
 (ns credit-card.service
-  (:require [credit-card.logic]))
+  (:require [credit-card.controller]))
 
 (defn -main []
   "Service Entrypoint"
