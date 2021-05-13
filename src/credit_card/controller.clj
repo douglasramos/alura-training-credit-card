@@ -1,6 +1,7 @@
 (ns credit-card.controller
   (:require [credit-card.db :as db]
-            [credit-card.logic :as logic])
+            [credit-card.logic :as logic]
+            [credit-card.adapter :as adapter])
   (:import [java.time LocalDateTime]))
 
 ;; Random Data
@@ -8,7 +9,7 @@
   ([]
    (random-transaction :food))
   ([category]
-   (random-transaction category (logic/string->datetime "2021-05-02T16:40:00")))
+   (random-transaction category (adapter/string->datetime "2021-05-02T16:40:00")))
   ([category date]
    (random-transaction category date 24.5))
   ([category date value]
@@ -24,7 +25,7 @@
 (def random-credit-card
   {:number   5492316632645226
    :cvv      534
-   :due-date (logic/string->datetime "2029-09-30T23:59:00")
+   :due-date (adapter/string->datetime "2029-09-30T23:59:00")
    :limit    100})
 
 ;; Use Cases
@@ -46,15 +47,7 @@
 (defn calculate-available-limit! []
   (logic/available-limit (db/transactions) (get-in db/db [:credit-card :limit])))
 
-;; Manual tests
-(create-account! random-costumer)
+(defn transactions-by-category [category]
+  (filter #(= category (:category %)) (db/transactions)))
 
-(transact! (random-transaction :car))
 
-(list-transactions!)
-
-(calculate-available-limit!)
-
-(current-bill)
-
-(db/database)
