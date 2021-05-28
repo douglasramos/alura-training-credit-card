@@ -1,23 +1,26 @@
-(ns credit-card.db)
+(ns credit-card.db
+  (:require [datomic.api :as d]
+            [clojure.pprint :as pp]))
 
-; GLOBAL STATE (only for testing purpose)
-(def db {:transactions []})
+; Transactions
+(defn insert! [entity storage]
+  (pp/pprint @(d/transact (:conn storage) [entity])))
 
-(defn transactions []
-  (:transactions db))
+; Queries
+; TODO makes all queries receives the db as an input
+(defn transactions [storage]
+  (d/q '[:find [(pull ?e [*]) ...]
+         :where [?e :transaction/category]] (d/db (:conn storage))))
 
-(defn costumer []
-  (:costumer db))
+(defn costumer [storage]
+  (d/q '[:find (pull ?e [*]) .
+         :where [?e :costumer/cpf]] (d/db (:conn storage))))
 
-(defn credit-card []
-  (:credit-card db))
+(defn credit-card [storage]
+  (d/q '[:find (pull ?e [*]) .
+         :where [?e :credit-card/number]] (d/db (:conn storage))))
 
-(defn insert-transaction! [transaction]
-  (def db (update db :transactions conj transaction)))
 
-(defn insert-costumer! [costumer]
-  (def db (assoc db :costumer costumer)))
 
-(defn insert-credit-card! [credit-card]
-  (def db (assoc db :credit-card credit-card)))
+
 

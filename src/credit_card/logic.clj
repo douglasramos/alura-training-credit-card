@@ -2,11 +2,11 @@
 
 (defn total-amount-spent [transactions]
   (->> transactions
-       (map :value)
+       (map :transaction/value)
        (reduce +)))
 
 (defn transactions-by-category [transactions]
-  (group-by :category transactions))
+  (group-by :transaction/category transactions))
 
 (defn category-bill [transactions]
   (reduce
@@ -15,22 +15,21 @@
         new-map
         key
         (->> value
-             (map :value)
+             (map :transaction/value)
              (reduce +))))
     {}
     (transactions-by-category transactions)))
 
 (defn month-transactions [month all-transactions]
   (filter
-    #(= month (.getMonth (:date %)))
+    #(= month (.getMonth (:transaction/date %)))
     all-transactions))
 
 (defn bill [transactions]
   (assoc
     (category-bill transactions)
-    :total
-    (reduce + (map :value transactions))))
-
+    :transaction/total
+    (reduce + (map :transaction/value transactions))))
 
 (defn available-limit [transactions limit]
   (- limit (total-amount-spent transactions)))

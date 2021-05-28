@@ -15,39 +15,41 @@
   ([category date value]
    (random-transaction category date value "Burger king"))
   ([category date value establishment]
-   {:date date, :category category, :value value, :establishment establishment}))
+   {:transaction/date          date
+    :transaction/category      category
+    :transaction/value         value
+    :transaction/establishment establishment}))
 
 (def random-costumer
-  {:name  "Douglas Ramos"
-   :cpf   "051.342.3452-44"
-   :email "douglas.ramos@nubank.com.br"})
+  {:costumer/name  "Douglas Ramos"
+   :costumer/cpf   "051.342.3452-44"
+   :costumer/email "douglas.ramos@nubank.com.br"})
 
 (def random-credit-card
-  {:number   5492316632645226
-   :cvv      534
-   :due-date (adapter/string->datetime "2029-09-30T23:59:00")
-   :limit    100})
+  {:credit-card/number   5492316632645226
+   :credit-card/cvv      534
+   :credit-card/due-date (adapter/string->datetime "2029-09-30T23:59:00")
+   :credit-card/limit    100.0})
 
 ;; Use Cases
-(defn transact! [transaction]
-  (db/insert-transaction! transaction))
+(defn transact! [transaction storage]
+  (db/insert! (adapter/transaction-model->transaction-schema transaction) storage))
 
-(defn create-account! [costumer]
-  (db/insert-costumer! costumer)
-  (db/insert-credit-card! random-credit-card))
+(defn create-account! [costumer storage]
+  (db/insert! costumer storage)
+  (db/insert! (adapter/credit-card-model->credit-card-schema random-credit-card) storage))
 
-(defn list-transactions! []
-  (db/transactions))
+(defn list-transactions! [storage]
+  (db/transactions storage))
 
-(defn current-bill []
-  (let [current-month (.getMonth (LocalDateTime/now))]
-    (logic/bill
-      (logic/month-transactions current-month (db/transactions)))))
+(defn current-bill [storage]
+  (let [current-month (.getMonth (LocalDateTime/now))
+        all-transactions (map adapter/transaction-schema->transaction-model (db/transactions storage))
+        month-transactions (logic/month-transactions current-month all-transactions)]
+    (logic/bill month-transactions)))
 
-(defn calculate-available-limit! []
-  (logic/available-limit (db/transactions) (get-in db/db [:credit-card :limit])))
+(defn calculate-available-limit! [storage]
+  (logic/available-limit (db/transactions storage) (:credit-card/limit (db/credit-card storage))))
 
-(defn transactions-by-category [category]
-  (filter #(= category (:category %)) (db/transactions)))
-
-
+(defn transactions-by-category [category storage]
+  (filter #(= category (:transaction/category %)) (db/transactions storage)))
