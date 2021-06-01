@@ -1,7 +1,8 @@
 (ns credit-card.service
-  (:require [credit-card.controller :as controller]
+  (:require [clojure.pprint :as pp]
+            [credit-card.controller :as controller]
             [credit-card.db :as db]
-            [clojure.pprint :as pp]
+            [credit-card.data :as data]
             [credit-card.components.system-utils :as system-utils]))
 
 ; necessary to be a function because it is evaluated before
@@ -9,9 +10,9 @@
 (defn storage [] (system-utils/get-component :storage))
 
 (defn set-initial-state [storage]
-  (controller/create-account! controller/random-costumer storage)
+  (controller/create-account! data/arbitrary-costumer storage)
   (run!
-    #(controller/transact! (controller/random-transaction %) storage)
+    #(controller/transact! (data/arbitrary-transaction %) storage)
     [:food :food :entertainment :transport]))
 
 (defn print-costumer [storage]

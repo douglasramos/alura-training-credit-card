@@ -20,7 +20,7 @@
 (def transaction-schema [{:db/ident       :transaction/category
                           :db/valueType   :db.type/keyword
                           :db/cardinality :db.cardinality/one}
-                         {:db/ident       :transaction/value
+                         {:db/ident       :transaction/amount
                           :db/valueType   :db.type/double
                           :db/cardinality :db.cardinality/one}
                          {:db/ident       :transaction/date

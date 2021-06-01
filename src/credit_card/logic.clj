@@ -1,22 +1,22 @@
 (ns credit-card.logic)
 
-(defn total-amount-spent [transactions]
+(defn ^:private total-amount-spent [transactions]
   (->> transactions
-       (map :transaction/value)
+       (map :transaction/amount)
        (reduce +)))
 
-(defn transactions-by-category [transactions]
+(defn ^:private transactions-by-category [transactions]
   (group-by :transaction/category transactions))
 
-(defn category-bill [transactions]
+(defn ^:private category-total-amount [category-transactions]
+  (->> category-transactions
+       (map :transaction/amount)
+       (reduce +)))
+
+(defn ^:private category-billing-statement [transactions]
   (reduce
-    (fn [new-map [key value]]
-      (assoc
-        new-map
-        key
-        (->> value
-             (map :transaction/value)
-             (reduce +))))
+    (fn [category-bill [category category-transactions]]
+      (assoc category-bill category (category-total-amount category-transactions)))
     {}
     (transactions-by-category transactions)))
 
@@ -25,16 +25,14 @@
     #(= month (.getMonth (:transaction/date %)))
     all-transactions))
 
-(defn bill [transactions]
+(defn billing-statement [transactions]
   (assoc
-    (category-bill transactions)
-    :transaction/total
-    (reduce + (map :transaction/value transactions))))
+    (category-billing-statement transactions)
+    :total
+    (reduce + (map :transaction/amount transactions))))
 
 (defn available-limit [transactions limit]
   (- limit (total-amount-spent transactions)))
-
-
 
 
 

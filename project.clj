@@ -7,7 +7,8 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [clojure.java-time "0.3.1"]
                  [com.datomic/datomic-pro "1.0.6269"]
-                 [com.stuartsierra/component "1.0.0"]]
+                 [com.stuartsierra/component "1.0.0"]
+                 [nubank/matcher-combinators "3.1.4"]]
 
   :profiles {:repl-start {:injections   [(require '[credit-card.server :as s] '[credit-card.service])
                                          (s/run-dev)]
